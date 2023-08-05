@@ -1,0 +1,14 @@
+diff --git a/node_modules/contentful-webhook-listener/index.js b/node_modules/contentful-webhook-listener/index.js
+index 4d77035..4607db9 100644
+--- a/node_modules/contentful-webhook-listener/index.js
++++ b/node_modules/contentful-webhook-listener/index.js
+@@ -30,8 +30,7 @@ class ContentfulWebhookListener extends httpServer {
+             if (auth) {
+ 
+                 authorization = request.headers["authorization"];
+-                authInBase64 = new Buffer(auth).toString("base64");
+-                if (authorization !== `Basic ${authInBase64}`) {
++                if (authorization !== `Basic ${auth}`) {
+ 
+                     response.writeHead(401, "Unauthorized");
+                     response.end();
