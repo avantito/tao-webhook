@@ -8,6 +8,9 @@ require("dotenv").config();
   under Users -> tao-group -> Application Passwords
 
   2. Update .htaccess file to Allow HTTP Authentication
+  
+  First install: WP Htaccess Editor
+  https://wordpress.org/plugins/wp-htaccess-editor/
 
   # Enable HTTP Auth
   RewriteCond %{HTTP:Authorization} ^(.*)
@@ -16,6 +19,7 @@ require("dotenv").config();
   3. Add the necessary fields to ACF
   Events -> Contentful ID -> contentful_id
 
+  4. ALL Contentful VENUE STORE_IDs must match corresponding Wordpress VENUE SLUGs
 */
 
 import download from "image-downloader";
