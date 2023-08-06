@@ -96,4 +96,4 @@ webhook.on("publish", async function (payload: any) {
   }
 });
 
-webhook.listen(3000);
+webhook.listen(process.env.PORT || 3000);
