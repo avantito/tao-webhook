@@ -9,8 +9,8 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development nodemon src/main.ts -w src/",
-    "start": "NODE_ENV=master ts-node src/main.ts",
-    "build": "NODE_ENV=master vite build",
+    "start": "NODE_ENV=development ts-node src/main.ts",
+    "build": "NODE_ENV=development vite build",
     "postinstall": "npx patch-package"
   },
   "devDependencies": {
