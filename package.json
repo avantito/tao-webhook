@@ -8,9 +8,9 @@
     "yarn": "1.22.19"
   },
   "scripts": {
-    "dev": "NODE_ENV=development nodemon src/main.ts -w src/",
-    "start": "NODE_ENV=development ts-node src/main.ts",
-    "build": "NODE_ENV=development vite build",
+    "dev": "infisical run --env=dev -- nodemon src/main.ts -w src/",
+    "start": "infisical run --env=dev -- ts-node src/main.ts",
+    "build": "infisical run --env=production -- vite build",
     "postinstall": "npx patch-package"
   },
   "devDependencies": {
