@@ -1,0 +1,1 @@
+infisical run --env=prod -- yarn start
