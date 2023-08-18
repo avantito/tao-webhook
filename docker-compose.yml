@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  webhook:
+    build:
+      context: .
+      dockerfile: DockerfileNode
+    container_name: tao-webhook
+    hostname: tao-webhook
+    ports:
+      - 3000:3000
+
+    networks:
+      - tao
+  nginx:
+    build:
+      context: .
+      dockerfile: DockerfileNginx
+    container_name: tao-nginx
+    hostname: tao-nginx
+    ports:
+      - 80:80
+      - 443:443
+
+    depends_on:
+      - webhook
+    networks:
+      - tao
+
+networks:
+  tao:
+    driver: bridge

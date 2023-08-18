@@ -1,0 +1,11 @@
+FROM node:20.5.0
+
+WORKDIR /usr/tao-webhook/
+
+COPY package*.json ./
+RUN yarn install
+
+COPY . ./
+EXPOSE 3000
+RUN yarn build
+CMD ["yarn", "start"]

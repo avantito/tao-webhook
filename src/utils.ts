@@ -32,7 +32,7 @@ function getTimezoneOffset(dateString: string) {
 
 export function getNormalizedContenful(payload: any): WordpressPayload {
   const normalized = {};
-  Object.keys(keyMap).forEach((key: any) => {
+  Object.keys(keyMap)?.forEach((key: any) => {
     switch (key) {
       case "id":
         // @ts-ignore
@@ -40,14 +40,14 @@ export function getNormalizedContenful(payload: any): WordpressPayload {
         break;
       case "name":
         // @ts-ignore
-        set(normalized, keyMap[key] as string, payload.fields["id"]["en-US"]);
+        set(normalized, keyMap[key] as string, payload.fields["id"]?.["en-US"]);
         break;
       case "carouselImage":
         set(
           normalized,
           // @ts-ignore
           keyMap[key] as string,
-          payload.fields[key]["en-US"].sys.id
+          payload.fields[key]?.["en-US"].sys.id
         );
         break;
       case "venue":
@@ -55,15 +55,15 @@ export function getNormalizedContenful(payload: any): WordpressPayload {
           normalized,
           // @ts-ignore
           keyMap[key] as string,
-          payload.fields[key]["en-US"].sys.id
+          payload.fields[key]?.["en-US"].sys.id
         );
         break;
       case "startTime":
         const startDate = format(
-          new Date(payload.fields[key]["en-US"]),
+          new Date(payload.fields[key]?.["en-US"]),
           "M/d/yyyy h:mm a"
         );
-        const timezone = getTimezoneOffset(payload.fields[key]["en-US"]);
+        const timezone = getTimezoneOffset(payload.fields[key]?.["en-US"]);
         set(
           normalized,
           // @ts-ignore
@@ -79,7 +79,7 @@ export function getNormalizedContenful(payload: any): WordpressPayload {
         break;
       case "endTime":
         const endDate = format(
-          new Date(payload.fields[key]["en-US"]),
+          new Date(payload.fields[key]?.["en-US"]),
           "M/d/yyyy h:mm a"
         );
         set(
@@ -91,7 +91,7 @@ export function getNormalizedContenful(payload: any): WordpressPayload {
         break;
       default:
         // @ts-ignore
-        set(normalized, keyMap[key] as string, payload.fields[key]["en-US"]);
+        set(normalized, keyMap[key] as string, payload.fields[key]?.["en-US"]);
     }
   });
   return normalized as WordpressPayload;
@@ -116,6 +116,11 @@ export function imagePayload(artist: string, venue: string, startTime: string) {
   };
 }
 
+function containsLasVegas(sentence: string): boolean {
+  const regex = /las[-_ ]?vegas/i;
+  return regex.test(sentence);
+}
+
 export function getNormalizedVariables({
   wordpressPayload,
   entry,
@@ -135,6 +140,7 @@ export function getNormalizedVariables({
     artist,
     venueName,
     venueSlug,
+    isVegasVenue: containsLasVegas(venueName),
     imgUrl,
   };
 }

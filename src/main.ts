@@ -41,29 +41,52 @@ const { log } = console;
 webhook.on("publish", async function (payload: any) {
   // Kickoff the process
   log("Incoming Payload ======================");
+  let result;
 
-  if (payload.contentType === "event") {
+  if (payload?.contentType === "event") {
     const wordpressPayload = getNormalizedContenful(payload);
 
     log("Refetching Event from Contentful ======================");
     const entry = await client.getEntry(wordpressPayload.fields.contentful_id);
 
-    const { startDate, artist, venueName, venueSlug, imgUrl } =
+    const [existingEvent] = await api.events().filter({
+      meta_key: "contentful_id",
+      meta_value: wordpressPayload.fields.contentful_id,
+    });
+
+    const { startDate, artist, venueName, venueSlug, isVegasVenue, imgUrl } =
       getNormalizedVariables({ wordpressPayload, entry });
+
+    if (isVegasVenue) {
+      log("Skipping Las Vegas Venue ======================");
+      return;
+    }
 
     try {
       log("Retrieving Venue From Wordpress ======================");
       let wpVenue = await api.venues().slug(venueSlug);
       wordpressPayload.fields.event_venue = wpVenue[0].id;
 
-      log(
-        `Creating "${startDate} - ${artist} - ${venueName}" in Wordpress ======================`
-      );
-      let result = await api.events().create({
-        title: `${startDate} - ${artist} - ${venueName}`,
-        status: "publish",
-        ...wordpressPayload,
-      });
+      if (existingEvent) {
+        log("Event Already Exists ======================");
+        result = await api
+          .events()
+          .id(existingEvent.id)
+          .update({
+            title: `${startDate} - ${artist} - ${venueName}`,
+            status: "publish",
+            ...wordpressPayload,
+          });
+      } else {
+        log(
+          `Creating "${startDate} - ${artist} - ${venueName}" in Wordpress ======================`
+        );
+        result = await api.events().create({
+          title: `${startDate} - ${artist} - ${venueName}`,
+          status: "publish",
+          ...wordpressPayload,
+        });
+      }
 
       log(
         `Downloading Image from Contentful: ${imgUrl} ======================`
@@ -96,4 +119,6 @@ webhook.on("publish", async function (payload: any) {
   }
 });
 
-webhook.listen(process.env.PORT || 3000);
+webhook.listen(process.env.PORT || 3000, () => {
+  log(`Listening on port ${process.env.PORT || 3000}!`);
+});
