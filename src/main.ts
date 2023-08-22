@@ -44,9 +44,10 @@ webhook.on("publish", async function (payload: any) {
   let result;
 
   if (payload?.contentType === "event") {
+    // Convert Contenful to Wordpress Payload
     const wordpressPayload = getNormalizedContenful(payload);
 
-    log("Refetching Event from Contentful ======================");
+    log("Refetching Full Event Data from Contentful ======================");
     const entry = await client.getEntry(wordpressPayload.fields.contentful_id);
 
     const [existingEvent] = await api.events().filter({
@@ -54,6 +55,7 @@ webhook.on("publish", async function (payload: any) {
       meta_value: wordpressPayload.fields.contentful_id,
     });
 
+    // Give us some variables to work with
     const { startDate, artist, venueName, venueSlug, isVegasVenue, imgUrl } =
       getNormalizedVariables({ wordpressPayload, entry });
 
@@ -63,9 +65,12 @@ webhook.on("publish", async function (payload: any) {
     }
 
     try {
-      log("Retrieving Venue From Wordpress ======================");
-      let wpVenue = await api.venues().slug(venueSlug);
-      wordpressPayload.fields.event_venue = wpVenue[0].id;
+      if (venueSlug) {
+        log("Retrieving Venue From Wordpress ======================");
+        const wpVenue = await api.venues().slug(venueSlug);
+        wpVenue.length &&
+          (wordpressPayload.fields.event_venue = wpVenue[0]?.id);
+      }
 
       if (existingEvent) {
         log("Event Already Exists ======================");
@@ -88,29 +93,31 @@ webhook.on("publish", async function (payload: any) {
         });
       }
 
-      log(
-        `Downloading Image from Contentful: ${imgUrl} ======================`
-      );
-      const { filename } = await download.image({
-        url: imgUrl,
-        dest: IMAGE_DIRECTORY,
-      });
+      if (imgUrl) {
+        log(
+          `Downloading Image from Contentful: ${imgUrl} ======================`
+        );
+        const { filename } = await download.image({
+          url: imgUrl,
+          dest: IMAGE_DIRECTORY,
+        });
 
-      log(`Downloading ${filename} ======================`);
-      const image = await api
-        .media()
-        .file(filename)
-        .create(imagePayload(artist as string, venueName, startDate));
+        log(`Downloading ${filename} ======================`);
+        const image = await api
+          .media()
+          .file(filename)
+          .create(imagePayload(artist as string, venueName, startDate));
 
-      log(
-        `Associating Image: ${image.id} with Post: ${result.id} ======================`
-      );
-      await api.events().id(result.id).update({
-        featured_media: image.id,
-      });
+        log(
+          `Associating Image: ${image.id} with Post: ${result.id} ======================`
+        );
+        await api.events().id(result.id).update({
+          featured_media: image.id,
+        });
 
-      log(`Deleting ${filename} ======================`);
-      await deleteAllFilesInDirectory(IMAGE_DIRECTORY);
+        log(`Deleting ${filename} ======================`);
+        await deleteAllFilesInDirectory(IMAGE_DIRECTORY);
+      }
 
       log(`Done ======================`);
     } catch (e) {
@@ -120,5 +127,5 @@ webhook.on("publish", async function (payload: any) {
 });
 
 webhook.listen(process.env.PORT || 3000, () => {
-  log(`Listening on port ${process.env.PORT || 3000}!`);
+  log(`Listening on port ${process.env.PORT || 3000}! Most Recent Version`);
 });

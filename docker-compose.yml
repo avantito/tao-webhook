@@ -1,15 +1,56 @@
 version: '3'
 
 services:
-  webhook:
+  webhook_one:
     build:
       context: .
       dockerfile: DockerfileNode
-    container_name: tao-webhook
+    container_name: tao-webhook-one
     hostname: tao-webhook
+    environment:
+      - PORT=3001
     ports:
-      - 3000:3000
-
+      - 3001:3001
+    # restart: on-failure
+    networks:
+      - tao
+  webhook_two:
+    build:
+      context: .
+      dockerfile: DockerfileNode
+    container_name: tao-webhook-two
+    hostname: tao-webhook
+    environment:
+      - PORT=3002
+    ports:
+      - 3002:3002
+    # restart: on-failure
+    networks:
+      - tao
+  webhook_three:
+    build:
+      context: .
+      dockerfile: DockerfileNode
+    container_name: tao-webhook-three
+    hostname: tao-webhook
+    environment:
+      - PORT=3003
+    ports:
+      - 3003:3003
+    # restart: on-failure
+    networks:
+      - tao
+  webhook_four:
+    build:
+      context: .
+      dockerfile: DockerfileNode
+    container_name: tao-webhook-four
+    hostname: tao-webhook
+    environment:
+      - PORT=3004
+    ports:
+      - 3004:3004
+    # restart: on-failure
     networks:
       - tao
   nginx:
@@ -21,9 +62,12 @@ services:
     ports:
       - 80:80
       - 443:443
-
+    # restart: on-failure
     depends_on:
-      - webhook
+      - webhook_one
+      - webhook_two
+      - webhook_three
+      - webhook_four
     networks:
       - tao
 
